@@ -187,6 +187,7 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
     }
 
     @Override
+    @Transactional
     public void compensateSaga(Long sagaInstanceId) { // if error occurs the saga orchestrator will compensate all completed steps.
         SagaInstance sagaInstance = sagaInstanceRepository.findById(sagaInstanceId).orElseThrow(() -> new RuntimeException("Saga Instance not found"));
 
@@ -217,6 +218,7 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
     }
 
     @Override
+    @Transactional
     public void failSaga(Long sagaInstanceId) {
 
         SagaInstance sagaInstance = sagaInstanceRepository.findById(sagaInstanceId).orElseThrow(() -> new RuntimeException("Saga Instance not found"));
@@ -226,6 +228,7 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
     }
 
     @Override
+    @Transactional
     public void completeSaga(Long sagaInstanceId) {
 
         SagaInstance sagaInstance = sagaInstanceRepository.findById(sagaInstanceId).orElseThrow(() -> new RuntimeException("Saga Instance not found"));
