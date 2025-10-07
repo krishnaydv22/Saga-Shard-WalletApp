@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Table(name = "saga_instance")
 public class SagaInstance {
 

@@ -36,7 +36,7 @@ public class UpdateTransactionStatus implements ISagaStep {
 
        log.info("Transaction status updated for transaction {}" , transactionId);
 
-       context.put("transactionStatusAferUpdate", transaction.getStatus());
+       context.put("transactionStatusAfterUpdate", transaction.getStatus());
        log.info("update transaction step executed successfully");
 
 
@@ -65,6 +65,6 @@ public class UpdateTransactionStatus implements ISagaStep {
 
     @Override
     public String getName() {
-        return "UpdateTransactionStatus";
+        return SagaStepFactory.SagaStepType.UPDATE_TRANSACTION_STATUS_STEP.toString();
     }
 }
