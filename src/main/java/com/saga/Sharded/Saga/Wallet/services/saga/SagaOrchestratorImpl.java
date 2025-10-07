@@ -225,6 +225,8 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
         sagaInstance.setStatus(SagaStatus.FAILED);
         sagaInstanceRepository.save(sagaInstance);
 
+        compensateSaga(sagaInstanceId);
+
     }
 
     @Override
