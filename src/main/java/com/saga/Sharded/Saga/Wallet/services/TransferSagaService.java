@@ -75,7 +75,7 @@ public class TransferSagaService {
 
 
         } catch (Exception e) {
-            sagaOrchestrator.completeSaga(sagaInstanceId);
+            sagaOrchestrator.compensateSaga(sagaInstanceId);
             log.info("transfer saga completed with id  {}", sagaInstanceId);
 
 

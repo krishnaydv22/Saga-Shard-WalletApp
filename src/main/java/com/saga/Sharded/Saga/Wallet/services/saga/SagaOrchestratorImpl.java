@@ -73,7 +73,7 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
 //                .filter(s ->s.getStepName().equals(stepName))
 //                .findFirst()
 //                .orElse(SagaStep.builder().stepName(stepName).sagaInstanceId(sagaInstanceId).status(StepStatus.PENDING)
-//                        .build());
+//                        .build());v
 
        SagaStep sagaStepDB =  sagaStepRepository.findBySagaInstanceIdAndStepNameAndStatus(sagaInstanceId, stepName, StepStatus.PENDING)
                .orElse(SagaStep.builder().stepName(stepName).sagaInstanceId(sagaInstanceId).status(StepStatus.PENDING)
@@ -92,6 +92,10 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
            boolean success =  step.execute(sagaContext);
 
            if(success) {
+
+               sagaStepDB.setStatus(StepStatus.COMPLETED);
+               sagaStepRepository.save(sagaStepDB);
+
 
                sagaInstance.setCurrentStep(stepName);
                sagaInstance.setStatus(SagaStatus.RUNNING);
