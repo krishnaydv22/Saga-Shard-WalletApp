@@ -1,8 +1,10 @@
-package com.saga.Sharded.Saga.Wallet.services.saga;
+package com.saga.Sharded.Saga.Wallet.services;
 
 import com.saga.Sharded.Saga.Wallet.entity.SagaInstance;
 import com.saga.Sharded.Saga.Wallet.entity.Transaction;
 import com.saga.Sharded.Saga.Wallet.services.TransactionService;
+import com.saga.Sharded.Saga.Wallet.services.saga.SagaContext;
+import com.saga.Sharded.Saga.Wallet.services.saga.SagaOrchestrator;
 import com.saga.Sharded.Saga.Wallet.services.saga.steps.SagaStepFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +35,14 @@ public class TransferSagaService {
         SagaContext sagaContext = SagaContext.builder()
                 .data(Map.ofEntries(
                         Map.entry("transactionId", transaction.getId()),
-                        Map.entry("fromWalletId", fromWalletId),
+                        Map.entry("fromWalletId", fromWalletId), //fromWalletId and toWalletId should be the  userId
                         Map.entry("toWalletId", toWalletId),
                         Map.entry("amount", amount),
                         Map.entry("description", description)
                 ))
                 .build();
 
-        Long sagaInstanceId = sagaOrchestrator.startSaga(sagaContext);
+        Long sagaInstanceId = sagaOrchestrator.startSaga(sagaContext); // creating the saga
 
         log.info("saga instance created with id {}", sagaInstanceId);
 

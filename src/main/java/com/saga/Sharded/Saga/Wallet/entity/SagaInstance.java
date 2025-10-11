@@ -14,7 +14,7 @@ import lombok.*;
 public class SagaInstance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -24,7 +24,7 @@ public class SagaInstance {
     @Column(name = "context", columnDefinition = "json")
     private String context; //key value pair
 
-    @Column(name = "current_step", nullable = false)
+    @Column(name = "current_step")
     private String currentStep;
 
 

@@ -42,8 +42,7 @@ public class CreditDestinationWalletStep  implements ISagaStep {
 
         //3. credit destination wallet
 
-        wallet.credit(amount);
-        walletRepository.save(wallet);
+       walletRepository.updateBalanceByUserId(toWalletId, wallet.getBalance().add(amount));
         log.info("Wallet saved with balance {}", wallet.getBalance());
 
         //4. update the context with the changes
@@ -69,8 +68,8 @@ public class CreditDestinationWalletStep  implements ISagaStep {
                 .orElseThrow(() -> new IllegalArgumentException("wallet not found "));
         log.info("wallet fetched with balance {}" , wallet.getBalance());
 
-        wallet.debit(amount);
-        walletRepository.save(wallet);
+        walletRepository.updateBalanceByUserId(toWalletId, wallet.getBalance().subtract(amount));
+
         log.info("Wallet compensated with current balance {}", wallet.getBalance());
         context.put("toWalletBalanceAfterCreditCompensation", wallet.getBalance());
 

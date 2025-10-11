@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.saga.Sharded.Saga.Wallet.entity.Wallet;
 import com.saga.Sharded.Saga.Wallet.repositories.WalletRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 
@@ -16,6 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class WalletService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     private final WalletRepository walletRepository;
 
@@ -36,22 +42,13 @@ public class WalletService {
         return walletRepository.findById(id).orElseThrow(() -> new RuntimeException("Wallet not found"));
     }
 
-    public List<Wallet> getWalletsByUserId(Long userId) {
-        return walletRepository.findByUserId(userId);
-    }
-
-    @Transactional
-    public void debit(Long walletId, BigDecimal amount) {
-        log.info("Debiting {} to wallet {}", amount, walletId);
-        Wallet wallet = getWalletById(walletId);
-
-        wallet.debit(amount);
-        walletRepository.save(wallet);
-        log.info("debit {} successfully for wallet {}",amount, walletId);
 
 
 
-    }
+
+
+
+
 
     public Wallet getWalletByUserId(Long userId) {
         log.info("Getting wallet by user id {}", userId);
@@ -59,13 +56,48 @@ public class WalletService {
     }
 
     @Transactional
-    public void credit(Long walletId, BigDecimal amount) {
-        log.info("Crediting {} to wallet {}", amount, walletId);
-        Wallet wallet = getWalletById(walletId);
+    public Wallet debit(Long userId, BigDecimal amount) {
+        log.info("Debiting {} to userId {}", amount, userId);
+        Wallet wallet = getWalletByUserId(userId);
+//        wallet.setBalance(wallet.getBalance().subtract(amount)); // will not work, because sharding is done based on userId
 
-        wallet.credit(amount);
-        walletRepository.save(wallet);
-        log.info("credited {} successfully for wallet {}",amount, walletId);
+        walletRepository.updateBalanceByUserId(userId,wallet.getBalance().subtract(amount));//we are updating based on userId, because sharding of wallet has been done based on userId
+        // Clear persistence context to avoid stale data
+        entityManager.flush();
+        entityManager.clear();
+
+        Wallet updatedWallet = getWalletByUserId(userId);
+
+        log.info("debit {} successfully for wallet {}",amount, userId);
+
+        return updatedWallet;
+
+
+
+    }
+
+    @Transactional
+    public Wallet credit(Long userId, BigDecimal amount) {
+        log.info("Crediting {} to userId {}", amount, userId);
+        Wallet wallet = getWalletByUserId(userId);
+
+        // wallet.setBalance(wallet.getBalance().subtract(amount)); // will not work, because sharding is done based on userId
+
+
+
+        walletRepository.updateBalanceByUserId(userId,wallet.getBalance().add(amount)); //we are updating based on userId, because sharding of wallet has been done based on userId
+        //Note ->  update and delete return int value not Entity
+
+        // Clear persistence context to avoid stale data
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Wallet updatedWallet = getWalletByUserId(userId);
+
+        log.info("credited {} successfully for wallet {}",amount, userId);
+
+        return updatedWallet;
 
     }
 

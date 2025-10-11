@@ -37,9 +37,8 @@ public class DebitSourceWalletStep implements ISagaStep {
         context.put("originalSourceWalletBalance", wallet.getBalance());
 
         //3. debit the amount from the user
-        wallet.debit(amount);
+        walletRepository.updateBalanceByUserId(fromWalletId, wallet.getBalance().subtract(amount));
 
-        walletRepository.save(wallet);
         log.info("Wallet saved with balance {}", wallet.getBalance());
 
         //4. update the context
@@ -70,9 +69,8 @@ public class DebitSourceWalletStep implements ISagaStep {
         context.put("sourceWalletBalanceBeforeCreditCompensation", wallet.getBalance());
 
         //3. debit the amount from the user
-        wallet.credit(amount);
+        walletRepository.updateBalanceByUserId(fromWalletId, wallet.getBalance().add(amount));
 
-        walletRepository.save(wallet);
         log.info("Wallet saved with balance {}", wallet.getBalance());
 
         //4. update the context

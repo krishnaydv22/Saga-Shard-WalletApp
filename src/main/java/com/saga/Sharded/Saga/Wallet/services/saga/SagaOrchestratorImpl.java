@@ -32,13 +32,15 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
 
         try {
             String contextJson  =  objectMapper.writeValueAsString(context); //convert the context to a json as a string
+            log.info("context {}" , context);
+
             SagaInstance sagaInstance =  SagaInstance
                     .builder()
                   .context(contextJson)
                   .status(SagaStatus.STARTED)
                   .build();
 
-            sagaInstance =   sagaInstanceRepository.save(sagaInstance);
+            sagaInstance =  sagaInstanceRepository.save(sagaInstance);
             log.info("Started saga with id {}", sagaInstance.getId());
 
             return sagaInstance.getId();
