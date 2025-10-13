@@ -32,6 +32,7 @@ public class UpdateTransactionStatus implements ISagaStep {
        context.put("originalTransactionStatus",transaction.getStatus());
 
        transaction.setStatus(TransactionStatus.SUCCESS);
+
        transactionRepository.save(transaction);
 
        log.info("Transaction status updated for transaction {}" , transactionId);

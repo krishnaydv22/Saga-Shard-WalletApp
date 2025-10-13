@@ -67,6 +67,16 @@ rules:
           column: id
           keyGeneratorName: snowflakestrategy
 
+      transaction_history:
+        actualDataNodes: shardwallet${1..2}.transaction_history
+        databaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: db-inline-user-id
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflakestrategy
+
     shardingAlgorithms:
       db-inline:
         type: INLINE

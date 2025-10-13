@@ -1,12 +1,15 @@
 package com.saga.Sharded.Saga.Wallet.services.saga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saga.Sharded.Saga.Wallet.entity.SagaInstance;
-import com.saga.Sharded.Saga.Wallet.entity.SagaStep;
+import com.saga.Sharded.Saga.Wallet.entity.*;
 import com.saga.Sharded.Saga.Wallet.enums.SagaStatus;
 import com.saga.Sharded.Saga.Wallet.enums.StepStatus;
+import com.saga.Sharded.Saga.Wallet.enums.TransactionType;
 import com.saga.Sharded.Saga.Wallet.repositories.SagaInstanceRepository;
 import com.saga.Sharded.Saga.Wallet.repositories.SagaStepRepository;
+import com.saga.Sharded.Saga.Wallet.services.TransactionHistoryService;
+import com.saga.Sharded.Saga.Wallet.services.UserService;
+import com.saga.Sharded.Saga.Wallet.services.WalletService;
 import com.saga.Sharded.Saga.Wallet.services.saga.steps.SagaStepFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,11 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
     private final SagaInstanceRepository sagaInstanceRepository;
     private  final SagaStepFactory  sagaStepFactory;
     private  final SagaStepRepository sagaStepRepository;
+    private final UserService userService;
+    private final TransactionHistoryService transactionHistoryService;
+    private final WalletService walletService;
+
+
 
     @Override
     @Transactional
@@ -241,7 +249,50 @@ public class SagaOrchestratorImpl implements SagaOrchestrator{
 
         SagaInstance sagaInstance = sagaInstanceRepository.findById(sagaInstanceId).orElseThrow(() -> new RuntimeException("Saga Instance not found"));
         sagaInstance.setStatus(SagaStatus.COMPLETED);
+        log.info("ReachedTEst1");
         sagaInstanceRepository.save(sagaInstance);
+        log.info("ReachedTEst2");
+
+
+        try {
+            SagaContext context = objectMapper.readValue(sagaInstance.getContext(), SagaContext.class);
+
+            User toWalletUser = userService.getUserById(context.getLong("toWalletId"));
+            Wallet toWallet = walletService.getWalletByUserId(toWalletUser.getId());
+            User fromWalletUser = userService.getUserById(context.getLong("fromWalletId"));
+            Wallet fromWallet = walletService.getWalletByUserId(fromWalletUser.getId());
+
+
+            TransactionHistory toHistory = TransactionHistory.builder()
+                    .amount(context.getBigDecimal("amount"))
+                    .transactionType(TransactionType.DEPOSIT)
+                    .balance(toWallet.getBalance())
+                    .userId(toWalletUser.getId())
+                    .build();
+
+            transactionHistoryService.saveTransactionHistory(toHistory);
+
+            TransactionHistory fromHistory = TransactionHistory.builder()
+                    .amount(context.getBigDecimal("amount"))
+                    .transactionType(TransactionType.WITHDRAWAL)
+                    .balance(fromWallet.getBalance())
+                    .userId(fromWalletUser.getId())
+                    .build();
+
+//            log.info("fromHIstrory {}", fromHistory.getUser().getName());
+
+            transactionHistoryService.saveTransactionHistory(fromHistory);
+
+
+
+
+
+        }catch(Exception e){
+            log.info("error while converting into object");
+
+        }
+
+
 
 
 
